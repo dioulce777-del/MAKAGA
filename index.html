@@ -1,19 +1,57 @@
+
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MAKAGA</title>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MAKAGA - Marketplace Dakar</title>
 <style>
-body{font-family:sans-serif;text-align:center;padding:50px;background:#000;color:#fff}
-h1{font-size:50px}
-a{background:#fff;color:#000;padding:15px 30px;text-decoration:none;border-radius:30px;font-weight:bold}
-</style>
-</head>
-<body>
-<h1>MAKAGA</h1>
-<p>Bientôt disponible</p>
-<br><br>
-<a href="#">Découvrir</a>
-</body>
-</html>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+body{background:#0a0a0a;color:#fff}
+.header{padding:16px 4%;display:flex;justify-content:space-between;border-bottom:1px solid #222;position:sticky;top:0;background:#0a0a0a;z-index:10}
+.logo{font-weight:900;font-size:26px}.btn{padding:10px 18px;border-radius:30px;font-weight:800;border:none;cursor:pointer}
+.btn-white{background:#fff;color:#000}.btn-ghost{border:1px solid #333;color:#fff;background:transparent}
+.hero{padding:40px 4%;text-align:center}.hero h1{font-size:42px;font-weight:900}
+.hero p{color:#888;margin:12px auto;max-width:600px}.market{padding:15px 4%;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.pcard{background:#141414;border:1px solid #222;border-radius:18px;overflow:hidden}
+.pimg{height:160px;background:#0f0f0f;display:flex;align-items:center;justify-content:center;font-size:40px}
+.pimg img{width:100%;height:100%;object-fit:cover}.pbody{padding:10px}
+.pprice{font-weight:900;margin:4px 0}.small{font-size:11px;color:#666}
+.pactions a{display:block;text-align:center;padding:9px;border-radius:20px;font-weight:800;font-size:12px;text-decoration:none;margin-top:6px}
+.wa{background:#25D366;color:#fff}
+.panel{position:fixed;right:0;top:0;width:100%;max-width:380px;height:100vh;background:#111;border-left:1px solid #222;z-index:50;transform:translateX(100%);transition:.3s;overflow:auto;padding:18px}
+.panel.open{transform:translateX(0)}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:40}
+.overlay.show{display:block}input,select,textarea{width:100%;padding:11px;border-radius:10px;background:#0f0f0f;border:1px solid #222;color:#fff;margin:6px 0}
+.wave{background:#fff;color:#000;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin:8px 0}
+.tabs{display:flex;gap:6px;justify-content:center;padding:12px;flex-wrap:wrap}
+.tab{padding:7px 12px;border-radius:20px;background:#141414;border:1px solid #222;color:#888;cursor:pointer;font-size:13px}
+.tab.active{background:#fff;color:#000}
+</style></head><body>
+<div class="header"><div class="logo">MAKAGA</div><div><button class="btn btn-ghost" onclick="openP()">Ma Boutique</button> <button class="btn btn-white" onclick="openP()">Vendre</button></div></div>
+<div class="hero"><h1>Marché de Dakar</h1><p>2 produits gratuits pour essayer. Puis PRO 10.000F/mois sur Wave 76 313 46 54. Vente illimitée + vidéo pub IA + import Alibaba.</p><button class="btn btn-white" onclick="openP()">Commencer →</button></div>
+<div class="tabs"><div class="tab active" onclick="filt('all',this)">Tout</div><div class="tab" onclick="filt('telephone',this)">Tél</div><div class="tab" onclick="filt('ordi',this)">Ordis</div><div class="tab" onclick="filt('habit',this)">Habits</div><div class="tab" onclick="filt('chaussure',this)">Chauss</div><div class="tab" onclick="filt('sac',this)">Sacs</div></div>
+<div class="market" id="market"></div>
+<div class="overlay" id="ov" onclick="closeP()"></div>
+<div class="panel" id="pan">
+<h2>Ma Boutique MAKAGA</h2><p class="small" id="info">Inscription comme WhatsApp</p>
+<div id="login"><input id="shop" placeholder="Nom boutique"><input id="ph" placeholder="Numéro WhatsApp"><button class="btn btn-white" style="width:100%" onclick="saveS()">Créer ma boutique</button></div>
+<div id="dash" style="display:none">
+<div id="paywall" style="display:none;background:#1a1a0f;border:1px solid #444;border-radius:12px;padding:12px;margin:8px 0"><b>Limite 2 produits atteinte</b><p class="small">Passe PRO</p><div class="wave">Wave : 76 313 46 54<br>10.000F/mois</div><button class="btn" style="width:100%;background:#00ff88;color:#000" onclick="pro()">J'ai payé 10.000F</button><p class="small">Si non payé fin mois = boutique bloquée</p></div>
+<b>Ajouter produit</b> <span class="small" id="cnt"></span>
+<input id="pn" placeholder="Nom produit"><select id="pc"><option value="telephone">Téléphone</option><option value="ordi">Ordi</option><option value="habit">Habit</option><option value="chaussure">Chaussure</option><option value="sac">Sac</option><option value="autre">Autre</option></select><input id="pp" type="number" placeholder="Prix FCFA"><input id="pi" placeholder="Lien image ou Alibaba"><textarea id="pd" placeholder="Description"></textarea><button class="btn btn-white" style="width:100%" onclick="add()">Publier</button>
+<div id="my" style="margin-top:12px"></div>
+<button class="btn btn-ghost" style="width:100%;margin-top:12px" onclick="logout()">Déconnexion</button>
+</div></div>
+<script>
+let s=JSON.parse(localStorage.getItem('ms')||'null'),ps=JSON.parse(localStorage.getItem('mp')||'[]'),f='all';
+if(!ps.length){ps=[{id:'1',name:'iPhone 12 Pro',cat:'telephone',price:285000,img:'',desc:'128Go',shop:'Dakar Phone',phone:'771234567',o:'771234567'},{id:'2',name:'Jordan 1',cat:'chaussure',price:35000,img:'',desc:'42 neuf',shop:'Sneaker DK',phone:'781112233',o:'781112233'},{id:'3',name:'MacBook M1',cat:'ordi',price:450000,img:'',desc:'8/256',shop:'Tech SN',phone:'775554433',o:'775554433'}];localStorage.setItem('mp',JSON.stringify(ps))}
+function isPro(){return s&&s.pu&&new Date(s.pu)>new Date()}
+function render(){let c=document.getElementById('market');c.innerHTML='';ps.filter(p=>f==='all'||p.cat===f).slice().reverse().forEach(p=>{c.innerHTML+=`<div class="pcard"><div class="pimg">${p.img?`<img src="${p.img}">`:'📦'}</div><div class="pbody"><h4>${p.name}</h4><div class="small">${p.cat} - ${p.shop}</div><div class="pprice">${p.price.toLocaleString()} FCFA</div><div class="small">${p.desc}</div><a class="wa pactions" href="https://wa.me/221${p.phone}?text=Je veux ${p.name} sur MAKAGA" target="_blank" style="display:block;text-align:center;padding:9px;border-radius:20px;font-weight:800;font-size:12px;text-decoration:none;margin-top:6px;background:#25D366;color:#fff">WhatsApp</a></div></div>`});}
+function renderMy(){let my=ps.filter(p=>p.o===s.phone);document.getElementById('cnt').innerText=my.length+'/2';document.getElementById('my').innerHTML=my.map(p=>`<div style="background:#0f0f0f;border:1px solid #222;border-radius:10px;padding:8px;margin:5px 0;display:flex;justify-content:space-between"><span>${p.name}</span><span onclick="del('${p.id}')" style="cursor:pointer">✕</span></div>`).join('');document.getElementById('paywall').style.display=(my.length>=2&&!isPro())?'block':'none'}
+function openP(){document.getElementById('pan').classList.add('open');document.getElementById('ov').classList.add('show');if(s){document.getElementById('login').style.display='none';document.getElementById('dash').style.display='block';document.getElementById('info').innerText=s.shop+' - '+(isPro()?'PRO':'Gratuit');renderMy()}else{document.getElementById('login').style.display='block';document.getElementById('dash').style.display='none'}}
+function closeP(){document.getElementById('pan').classList.remove('open');document.getElementById('ov').classList.remove('show')}
+function saveS(){let shop=document.getElementById('shop').value,ph=document.getElementById('ph').value.replace(/\s/g,'');if(!shop||!ph)return alert('Remplis');s={shop,phone:ph,pu:null};localStorage.setItem('ms',JSON.stringify(s));openP();render()}
+function add(){let my=ps.filter(p=>p.o===s.phone);if(my.length>=2&&!isPro())return alert('Paye PRO 10.000F Wave 763134654');let n=document.getElementById('pn').value,p=document.getElementById('pp').value;if(!n||!p)return alert('Nom+prix');ps.push({id:Date.now()+'',name:n,cat:document.getElementById('pc').value,price:Number(p),img:document.getElementById('pi').value,desc:document.getElementById('pd').value,shop:s.shop,phone:s.phone,o:s.phone});localStorage.setItem('mp',JSON.stringify(ps));render();renderMy();alert('Publié!')}
+function del(id){ps=ps.filter(p=>p.id!==id);localStorage.setItem('mp',JSON.stringify(ps));render();renderMy()}
+function pro(){let c=prompt('Code Wave après 10.000F sur 763134654');if(!c)return;let d=new Date();d.setDate(d.getDate()+30);s.pu=d.toISOString();localStorage.setItem('ms',JSON.stringify(s));alert('PRO actif jusqu au '+d.toLocaleDateString());openP()}
+function logout(){localStorage.removeItem('ms');location.reload()}
+function filt(cat,el){f=cat;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');render()}
+render();
+</script></body></html>
